@@ -49,7 +49,7 @@
     function getLastStatutRelais()
     {
         global $conn;
-        $query = "SELECT * FROM CONSOMMATION ORDER BY ID DESC LIMIT 1";
+        $query = "SELECT * FROM RELAIS ORDER BY ID DESC LIMIT 1";
         $response = array();
         $result = mysqli_query($conn, $query);
         while($row = mysqli_fetch_array($result))
