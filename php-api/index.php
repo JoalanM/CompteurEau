@@ -77,11 +77,15 @@
             {
                 getLastStatutRelais();
             }
+            if($ID=="RELAIS")
+            {
+                getStatutRelais();
+            }
             }
             else
             {
                 getConsommations();
-                getStatutRelais();
+                //getStatutRelais();
             }
             break;
         default:
