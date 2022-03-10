@@ -60,6 +60,37 @@
         echo json_encode($response, JSON_PRETTY_PRINT);
     }
 
+    function AddPresence()
+    {
+        global $conn;
+        $presence = $_POST["presence"];
+        if($presence=="oui")
+        {
+           echo $query="INSERT INTO `VACANCES`(`vac`) VALUES ('".$presence."')"; 
+        }
+        else if($presence=="non")
+        {
+           echo $query="INSERT INTO `VACANCES`(`vac`) VALUES ('".$presence."')"; 
+        }
+        
+        if(mysqli_query($conn, $query))
+        {
+            $response=array(
+                'status' => 1,
+                'status_message' =>'Valeur ajoutée avec succès '
+            );
+        }
+        else
+        {
+            $response=array(
+                'status' => 0,
+                'status_message' =>'ERROR!.'. mysqli_error($conn)
+            );
+        }
+        header('Content-Type: application/json');
+        echo json_encode($response);
+    }
+
 
 
     switch($request_method)
@@ -91,6 +122,10 @@
         default:
             // Invalid Request Method
             header("HTTP/1.0 405 Method Not Allowed");
+            break;
+        case 'POST':
+            // Ajouter un produit
+            AddPresence();
             break;
     }
 
