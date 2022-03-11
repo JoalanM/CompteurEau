@@ -17,7 +17,7 @@
 	$servername = "localhost";
 	$username_db = "snir";
 	$password_db = "snir";
-	$dbname = "METEO";
+	$dbname = "EAU";
 	
     // Création de la connexion
     $conn = new mysqli($servername, $username_db, $password_db, $dbname);
