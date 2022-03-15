@@ -1,5 +1,18 @@
 <?php
 
+                            //                                                                           Requête API                                                         
+                            //                                                                                 ||
+                            //                             GET :                                               ||                              POST :
+                            // +Obtenir toute les valeur de consommation présente dans la base de donnée:      ||              +Informer d'un départ en vacances:
+                            //     http://192.168.5.74/php-api/index.php                                       ||                  http://192.168.5.74/php-api/index.php?presence=valeur
+                            // +Obtenir la dernière valeur de consommation reçu dans la base de donnée:        ||                      valeur = oui ou non 
+                            //     http://192.168.5.74/php-api/index.php?ID=1                                  ||                      oui = relais OFF
+                            // +Obtenir toute les état du relais présente dans la base de donnée:              ||                      non  = relais ON
+                            //     http://192.168.5.74/php-api/index.php?ID=RELAIS                             ||
+                            // +Obtenir le dernier état du relais reçu dans la base de donnée:                 ||
+                            //     http://192.168.5.74/php-api/index.php?ID=2                                  ||                       
+ 
+
     include("db_connect.php");
     $request_method = $_SERVER["REQUEST_METHOD"];
 
@@ -54,7 +67,7 @@
         $result = mysqli_query($conn, $query);
         while($row = mysqli_fetch_array($result))
         {
-            $response[] = $row;
+            $response[] = $row;//['id'+ 'etat'+ 'date'];
         }
         header('Content-Type: application/json');
         echo json_encode($response, JSON_PRETTY_PRINT);
