@@ -1,6 +1,5 @@
 <?php
 
-	header("Refresh:10");
 	//importation classes phpMQTT
 	require("classes/phpMQTT.php");
 	//**************************** */
@@ -30,54 +29,64 @@
 	//************************************************************************** */
 	//************************************************************************** */
 
-    $sql = "SELECT vac FROM VACANCES ORDER BY ID DESC LIMIT 1";
-    $result = $conn->query($sql);
+	function recupRelais($conn, $server, $port, $client_id, $username_mqtt, $password_mqtt)
+	{
+		
+		$sql = "SELECT vac FROM VACANCES ORDER BY ID DESC LIMIT 1";
+		$result = $conn->query($sql);
 
-    if ($result->num_rows > 0) 
-    {
-        // output data of each row
-        while($row = $result->fetch_assoc()) 
-        {
-			$reponse = $row["vac"];
-			echo $reponse;
-			
-			if($reponse == "non")
+		if ($result->num_rows > 0) 
+		{
+			// output data of each row
+			while($row = $result->fetch_assoc()) 
 			{
-				$message = "1";
-				$mqtt = new bluerhinos\phpMQTT($server, $port, $client_id);
+				
+				$reponse = $row["vac"];
+				echo $reponse;
 
-				if ($mqtt->connect(true,NULL,$username_mqtt,$password_mqtt)) 
+				if($reponse == "non")
 				{
-					$mqtt->publish("topic/relais",$message);
-					$mqtt->close();
+					$message = "1";
+					$mqtt = new bluerhinos\phpMQTT($server, $port, $client_id);
+					
+					if ($mqtt->connect(true,NULL,$username_mqtt,$password_mqtt)) 	
+					{
+						$mqtt->publish("topic/relais",$message);
+						$mqtt->close();
+					}
+					else
+					{
+						echo "Echec ou expiration du délai";
+					}
 				}
-				else
+				else if($reponse == "oui")
 				{
-					echo "Echec ou expiration du délai";
+					$message = "0";
+					$mqtt = new bluerhinos\phpMQTT($server, $port, $client_id);
+					
+					if ($mqtt->connect(true,NULL,$username_mqtt,$password_mqtt)) 
+					{
+						$mqtt->publish("topic/relais",$message);
+						$mqtt->close();
+					}
+					else
+					{
+						echo "Echec ou expiration du délai";
+					}
 				}
 			}
-			else if($reponse == "oui")
-			{
-				$message = "0";
-				$mqtt = new bluerhinos\phpMQTT($server, $port, $client_id);
+		} 
+		else 
+		{
+			echo "0 résultat";
+		}
+		$conn->close();
 
-				if ($mqtt->connect(true,NULL,$username_mqtt,$password_mqtt)) 
-				{
-					$mqtt->publish("topic/relais",$message);
-					$mqtt->close();
-				}
-				else
-				{
-					echo "Echec ou expiration du délai";
-				}
-			}
-    	}
-	} 
-    else 
-    {
-        echo "0 résultat";
-    }
-	$conn->close();
+	}
+
+	recupRelais($conn, $server, $port, $client_id, $username_mqtt, $password_mqtt);
+
+    
 	
 
 	//************************************************************************** */
