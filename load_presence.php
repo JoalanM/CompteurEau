@@ -1,28 +1,16 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Document</title>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script> 
-	
-</head>
-<body>
-
-	<div id="vacances">
-		<?php
+<?php
 			
-			//importation classes phpMQTT
-			require("classes/phpMQTT.php");
-			//**************************** */
+            //importation classes phpMQTT
+            require("classes/phpMQTT.php");
+            //**************************** */
 
-			//Informations de connexion au serveur Mosquitto
-			$server = "192.168.5.74";
-			$port = 1883;
-			$username_mqtt = "esp8266";
-			$password_mqtt = "esp8266";
-			$client_id = "PhpMqtt";
-			//************************* */
+            //Informations de connexion au serveur Mosquitto
+            $server = "192.168.5.74";
+            $port = 1883;
+            $username_mqtt = "esp8266";
+            $password_mqtt = "esp8266";
+            $client_id = "PhpMqtt";
+            //************************* */
 			
 			//***********Information de connexion BASE DE DONNEE***************** */
 			$servername = "localhost";
@@ -40,6 +28,10 @@
 			
 			//************************************************************************** */
 			//************************************************************************** */
+
+
+
+			
 			
 			$sql = "SELECT vac FROM VACANCES ORDER BY ID DESC LIMIT 1";
 			$result = $conn->query($sql);
@@ -48,10 +40,22 @@
 			{
 				// output data of each row
 				while($row = $result->fetch_assoc()) 
-				{	
+				{
+						
 					$reponse = $row["vac"];
 					echo $reponse;
-					if($reponse == "non")
+                    
+					
+				}
+			} 
+			else 
+			{
+				echo "0 résultat";
+			}
+			$conn->close();
+
+			
+			if($reponse == "non")
 					{
 						$message = "1";
 						$mqtt = new bluerhinos\phpMQTT($server, $port, $client_id);
@@ -81,36 +85,9 @@
 							echo "Echec ou expiration du délai";
 						}
 					}	
-				}
 
-			} 
-			else 
-			{
-				echo "0 résultat";
-			}
-			$conn->close();
-	
 			//************************************************************************** */
 			//************************************************************************** */
 
 
 		?>
-
-	</div>	
-    
-
-	<script>
-		setInterval('load_presence()', 500);
-		function load_presence()
-		{
-			$('#vacances').load('load_presence.php');
-		}
-	</script>
-
-
-
-
-</body>
-</html>
-
-
