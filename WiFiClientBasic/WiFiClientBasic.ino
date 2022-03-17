@@ -1,5 +1,8 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
+#include <ESP8266HTTPClient.h>
+#include <WiFiClient.h>
+#include <ArduinoJson.h>
 #include <Arduino.h>
 #include <Ticker.h>
 
@@ -25,7 +28,7 @@ int consommation_actuelle =0;
 const char *ssid = "snir"; // Enter your WiFi name
 const char *password = "12345678";  // Enter WiFi password
 //Info MQTT Broker
-const char *mqtt_broker = "192.168.5.87";
+const char *mqtt_broker = "192.168.5.74";
 const char *topic = "topic/relais";
 const char *mqtt_username = "esp8266";
 const char *mqtt_password = "esp8266";
@@ -76,6 +79,7 @@ void setup() {
     }
     Serial.println(" ");
     Serial.println("Connexion au réseau Wi-Fi établie : ");
+
     //Information Connexion
     Serial.println();
     Serial.print("IP address: ");
@@ -87,6 +91,9 @@ void setup() {
     Serial.print("Puissance de réception : ");
     Serial.print(WiFi.RSSI());
     Serial.println(" dBm");
+    //***********************************************************
+
+
     //Connexion au serveur mqtt broker
     client.setServer(mqtt_broker, mqtt_port);
     client.setCallback(callback);
@@ -102,14 +109,71 @@ void setup() {
             delay(2000);
         }
     }
+    //********************************************************************************
+
     // publish and subscribe
     client.publish(topic, "hello esp8266");
     client.subscribe(topic);
+    //********************************************************************************
 
-    //Relai ON 
-    digitalWrite(PIN_RELAIS, HIGH);
+    //Définir etat relai en fonction du dernier etat enregistrer 
+    WiFiClient clienthttp;
+    HTTPClient http;
     
-    Serial.println("Courrant circule ");
+    if(http.begin(clienthttp, "http://192.168.5.74/php-api/index.php?ID=2"))
+    {
+        int httpCode = http.GET();
+
+        if(httpCode > 0)
+        {
+            Serial.printf("[HTTP] GET... code: %d\n", httpCode);
+
+        }
+        if(httpCode == HTTP_CODE_OK || httpCode ==  HTTP_CODE_MOVED_PERMANENTLY)
+        {
+            
+            String payload = http.getString();
+            //Serial.println(payload);
+
+
+            char json[500];
+            payload.replace(" ", "");
+            payload.replace("\n", "");
+            payload.trim();
+            payload.remove(0, 1);
+            payload.toCharArray(json, 500);
+
+            DynamicJsonDocument doc(1024);
+            deserializeJson(doc, json);
+
+            const char* etat = doc["etat"];
+            Serial.println(String(etat));
+
+            if(String(etat)=="ON")
+            {
+                digitalWrite(PIN_RELAIS, HIGH);
+                Serial.println("Courrant circule ");
+            }
+            else if (String(etat) == "OFF")
+            {
+                digitalWrite(PIN_RELAIS, LOW);
+                Serial.println("Courrant fermée ");
+            }
+            
+        }
+        else
+        {
+            Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+        }
+        http.end();
+    }
+    else
+    {
+        Serial.printf("[HTTP} Unable to connect\n");
+    }
+    //digitalWrite(PIN_RELAIS, HIGH);
+    
+    
 
     pinMode(PIN_RELAIS, OUTPUT);
     pinMode(PIN_CAPTEUR_EAU, INPUT_PULLUP);
