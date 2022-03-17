@@ -2,7 +2,7 @@
 
 	require("classes/phpMQTT.php");
 
-	$server = "192.168.5.87";
+	$server = "192.168.5.74";
 	$port = 1883;
 	$username_mqtt = "esp8266";
 	$password_mqtt = "esp8266";
@@ -35,7 +35,7 @@
 		$servername = "localhost";
 		$username_db = "snir";
 		$password_db = "snir";
-		$dbname = "CompteurEau";
+		$dbname = "EAU";
 
 
 		$conn = new mysqli($servername, $username_db, $password_db, $dbname);
@@ -47,19 +47,19 @@
 
 		if($topic == "topic/consommation")
 		{
-			$sql = "INSERT IGNORE INTO consommation(litre)
+			$sql = "INSERT IGNORE INTO CONSOMMATION(consommation)
 					VALUES('$value')";
 		}
 		else if ($topic == "topic/relais")
 		{
 			if($value == "Etat actuelle : Ouvert")
 			{
-				$sql = "INSERT IGNORE INTO relais(etat)
+				$sql = "INSERT IGNORE INTO RELAIS(etat)
 					VALUES('ON')";
 			}
 			else if($value == "Etat actuelle : Fermer")
 			{
-				$sql = "INSERT IGNORE INTO relais(etat)
+				$sql = "INSERT IGNORE INTO RELAIS(etat)
 					VALUES('OFF')";
 			}
 			
