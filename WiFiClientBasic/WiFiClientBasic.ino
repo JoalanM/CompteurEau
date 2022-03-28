@@ -1,3 +1,4 @@
+//Importation bibliothéque
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <ESP8266HTTPClient.h>
@@ -5,64 +6,76 @@
 #include <ArduinoJson.h>
 #include <Arduino.h>
 #include <Ticker.h>
+// *****************************
+
 
 Ticker send_consomation;
 
-
+//Definition PIN 
 #define PIN_RELAIS 5
 #define PIN_CAPTEUR_EAU 4
-#define delai_sans_rebond 2000000 //2secondes
+// ***************************
+
 
 
 int etat_precedent_relais = digitalRead(PIN_RELAIS);
-//etat précédent compteur
-int etat_precedent = LOW;
+
+//Variable Filtrage Anti-Rebonds
+bool didStatus  = false;
+bool oldDidStatus  = false;
+unsigned long lastDebounceTime  = 0;
+unsigned long debounceDelay  = 50;
+// ************************************
+
 //Compteur litre 
 int litre = 0;
 int consommation_precedent = 0;
 int consommation_actuelle =0;
+// *****************************
 
 
 
 //Info WiFi
 const char *ssid = "snir"; // Enter your WiFi name
 const char *password = "12345678";  // Enter WiFi password
+//**********************************************************
+
 //Info MQTT Broker
 const char *mqtt_broker = "192.168.5.74";
 const char *topic = "topic/relais";
 const char *mqtt_username = "esp8266";
 const char *mqtt_password = "esp8266";
 const int mqtt_port = 1883;
+// ******************************************
 
+//Definition client mqtt
 WiFiClient espClient;
 PubSubClient client(espClient);
+//******************************
 
+
+//Fonction d'interruption
 void IRAM_ATTR get_litre()
 {
-    unsigned long _micros;
-    int etat_actuelle = digitalRead(PIN_CAPTEUR_EAU);
-    if(etat_actuelle!=etat_precedent)
-    {
-        _micros =micros();
-        //Serial.print("Etat actuelle : ");
-        //Serial.println(digitalRead(PIN_RELAIS));
-
-        if(_micros>=delai_sans_rebond)
-        {
-          if(digitalRead(PIN_CAPTEUR_EAU)==HIGH)
-          {
-            litre++;
-            Serial.print(litre);
-            Serial.println(" litre");
-
-          }
-        }
-        
-        etat_precedent = etat_actuelle;
-        _micros = 0;
-    } 
+   int reading = digitalRead(PIN_CAPTEUR_EAU);
+  if (reading != oldDidStatus) {
+    lastDebounceTime = millis();
+  }
+  if ((millis() - lastDebounceTime)>= debounceDelay) {
+    if (reading != didStatus) {
+      didStatus = reading;
+      
+      if(didStatus == 1){
+        litre++;
+      Serial.print(litre); Serial.println("litres");
+      }
+      //Serial.print(F("Sensor state : ")); Serial.println(didStatus);
+    }
+  }
+  oldDidStatus = reading;
 
 }
+
 
 void setup() {
     // serial baud à 115200;
@@ -120,6 +133,8 @@ void setup() {
     WiFiClient clienthttp;
     HTTPClient http;
     
+
+    //Reqête GET
     if(http.begin(clienthttp, "http://192.168.5.74/php-api/index.php?ID=2"))
     {
         int httpCode = http.GET();
@@ -164,6 +179,7 @@ void setup() {
         else
         {
             Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+
         }
         http.end();
     }
@@ -177,8 +193,8 @@ void setup() {
 
     pinMode(PIN_RELAIS, OUTPUT);
     pinMode(PIN_CAPTEUR_EAU, INPUT_PULLUP);
-    attachInterrupt(PIN_CAPTEUR_EAU, get_litre, HIGH);
-    send_consomation.attach(60,set_litre);
+    attachInterrupt(PIN_CAPTEUR_EAU, get_litre, HIGH); //Fonction d'interruption 
+    send_consomation.attach(1800,set_litre); //30 x 60 = 1800 s
 
 }
 
@@ -221,6 +237,24 @@ void loop()
         }
         etat_precedent_relais = etat_actuelle_relais;
     }
+    //Connexion au serveur mqtt broker
+    client.setServer(mqtt_broker, mqtt_port);
+    client.setCallback(callback);
+    while (!client.connected()) {
+        String client_id = "esp8266-client-";
+        client_id += String(WiFi.macAddress());
+        Serial.println("Connexion au Boker Mqtt");
+        if (client.connect(client_id.c_str(), mqtt_username, mqtt_password)) {
+            Serial.println("Connexion établie !");
+        } else {
+            Serial.print("Echec de connexion :  ");
+            Serial.print(client.state());
+            delay(2000);
+        }
+    }
+    //********************************************************************************
+
+
 
 }
 
