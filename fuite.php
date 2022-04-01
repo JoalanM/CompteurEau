@@ -57,7 +57,7 @@
 						
 					}
 					echo "<br>" .$consommation ."<br>";
-					if($consommation >=10)
+					if($consommation >= 10 && $consommation<20)
 					{
 						echo "ATTENTION FUITE EVENTUELLE ";
 						$destinataire = "myrtil.joalan1@gmail.com";
@@ -66,6 +66,21 @@
 						$headers = "From : joalan.myrtil1@gmail.com";
 						mail($destinataire, $sujet, $message, $headers); 
 					} 
+					elseif($consommation>20)
+					{
+						$message = "0";
+						$mqtt = new bluerhinos\phpMQTT($server, $port, $client_id);
+						
+						if ($mqtt->connect(true,NULL,$username_mqtt,$password_mqtt)) 	
+						{
+							$mqtt->publish("topic/relais",$message);
+							$mqtt->close();
+						}
+						else
+						{
+							echo "Echec ou expiration du délai";
+						}
+					}
 				} 
 				else 
 				{
