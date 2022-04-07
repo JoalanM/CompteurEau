@@ -3,14 +3,16 @@
                             //                                                                           Requête API                                                         
                             //                                                                                 ||
                             //                             GET :                                               ||                              POST :
-                            // +Obtenir toute les valeur de consommation présente dans la base de donnée:      ||              +Informer d'un départ en vacances:
-                            //     http://192.168.5.74/php-api/index.php                                       ||                  http://192.168.5.74/php-api/index.php?presence=valeur
+                            // +Obtenir toute les valeur de consommation présente dans la base de donnée:      ||              +Changer etat relais:
+                            //     http://192.168.5.74/php-api/index.php                                       ||                  http://192.168.5.74/php-api/index.php?etat=valeur
                             // +Obtenir la dernière valeur de consommation reçu dans la base de donnée:        ||                      valeur = oui ou non 
                             //     http://192.168.5.74/php-api/index.php?ID=1                                  ||                      oui = relais OFF
-                            // +Obtenir toute les état du relais présente dans la base de donnée:              ||                      non  = relais ON
-                            //     http://192.168.5.74/php-api/index.php?ID=RELAIS                             ||
-                            // +Obtenir le dernier état du relais reçu dans la base de donnée:                 ||
-                            //     http://192.168.5.74/php-api/index.php?ID=2                                  ||                       
+                            // +Savoir si la maisson est occupé ou non                                         ||                      non  = relais ON
+                            //      http://192.168.5.74/php-api/index.php?ID=3                                 ||               +Informer d'un départ, d'une abscence
+                            // +Obtenir le dernier état du relais reçu dans la base de donnée:                 ||                   http://192.168.5.74/php-api/index.php?presence=valeur
+                            //     http://192.168.5.74/php-api/index.php?ID=2                                  ||                       valeur = oui ou non 
+                            //                                                                                 ||                       oui = Maison occupée alors script détection fuite non activée
+                            //                                                                                 ||                       non = Maison vide alors script détection fuite est lancée
  
 
     include("db_connect.php");
@@ -44,20 +46,6 @@
         echo json_encode($response, JSON_PRETTY_PRINT);
     }
 
-    function getStatutRelais()
-    {
-        global $conn;
-        $query = "SELECT * FROM RELAIS";
-        $reponse = array();
-        $result = mysqli_query($conn, $query);
-        while($row = mysqli_fetch_array($result))
-        {
-            $response[] = $row;
-        }
-        header('Content-Type: application/json');
-        echo json_encode($response, JSON_PRETTY_PRINT);
-    }
-
 
     function getLastStatutRelais()
     {
@@ -73,17 +61,18 @@
         echo json_encode($response, JSON_PRETTY_PRINT);
     }
 
-    function AddPresence()
+    
+    function AddEtat()
     {
         global $conn;
-        $presence = $_POST["presence"];
-        if($presence=="oui")
+        $etat = $_POST["etat"];
+        if($etat=="OFF")
         {
-           echo $query="INSERT INTO `VACANCES`(`vac`) VALUES ('".$presence."')"; 
+           echo $query="INSERT INTO `ETAT`(`etat`) VALUES ('".$etat."')"; 
         }
-        else if($presence=="non")
+        else if($etat=="ON")
         {
-           echo $query="INSERT INTO `VACANCES`(`vac`) VALUES ('".$presence."')"; 
+           echo $query="INSERT INTO `ETAT`(`etat`) VALUES ('".$etat."')"; 
         }
         
         if(mysqli_query($conn, $query))
@@ -104,6 +93,53 @@
         echo json_encode($response);
     }
 
+    function getPresence()
+    {
+        global $conn;
+        $query = "SELECT * FROM PRESENCE ORDER BY ID DESC LIMIT 1";
+        $response = array();
+        $result = mysqli_query($conn, $query);
+        while($row = mysqli_fetch_array($result))
+        {
+            $response[] = $row;//['id'+ 'etat'+ 'date'];
+        }
+        header('Content-Type: application/json');
+        echo json_encode($response, JSON_PRETTY_PRINT);
+    }
+
+    function AddPresence()
+    {
+        global $conn;
+        $presence = $_POST["presence"];
+        if($presence=="oui")
+        {
+           echo $query="INSERT INTO `PRESENCE`(`presence`) VALUES ('".$presence."')"; 
+        }
+        else if($presence=="non")
+        {
+           echo $query="INSERT INTO `PRESENCE`(`presence`) VALUES ('".$presence."')"; 
+        }
+        
+        if(mysqli_query($conn, $query))
+        {
+            $response=array(
+                'status' => 1,
+                'status_message' =>'Valeur ajoutée avec succès '
+            );
+        }
+        else
+        {
+            $response=array(
+                'status' => 0,
+                'status_message' =>'ERROR!.'. mysqli_error($conn)
+            );
+        }
+        header('Content-Type: application/json');
+        echo json_encode($response);
+    }
+
+    
+
 
 
     switch($request_method)
@@ -121,9 +157,9 @@
             {
                 getLastStatutRelais();
             }
-            if($ID=="RELAIS")
+            if($ID==3)
             {
-                getStatutRelais();
+                getPresence();
             }
             }
             else
@@ -138,7 +174,14 @@
             break;
         case 'POST':
             // Ajouter un produit
-            AddPresence();
+            if($_POST["etat"])
+            {
+                AddEtat();
+            }
+            if($_POST["presence"])
+            {
+                AddPresence();
+            }
             break;
     }
 
