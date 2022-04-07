@@ -47,8 +47,12 @@
 
 		if($topic == "topic/consommation")
 		{
-			$sql = "INSERT IGNORE INTO CONSOMMATION(consommation)
-					VALUES('$value')";
+			
+
+			
+				$sql = "INSERT IGNORE INTO CONSOMMATION(consommation)
+						VALUES('$value')";
+			
 		}
 		else if ($topic == "topic/relais")
 		{
