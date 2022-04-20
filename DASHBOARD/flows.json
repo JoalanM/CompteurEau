@@ -1,0 +1,713 @@
+[
+    {
+        "id": "f6a90a50c1dcdb61",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "d0580b1c95d0895d",
+        "type": "http request",
+        "z": "f6a90a50c1dcdb61",
+        "name": "",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://192.168.5.74/php-api/index.php",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "x": 510,
+        "y": 240,
+        "wires": [
+            [
+                "4bc67ed140e3cbe6"
+            ]
+        ]
+    },
+    {
+        "id": "44a031360780f2d5",
+        "type": "ui_switch",
+        "z": "f6a90a50c1dcdb61",
+        "name": "",
+        "label": "Présence",
+        "tooltip": "",
+        "group": "c92730fc04b8007e",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "decouple": "false",
+        "topic": "topic",
+        "topicType": "msg",
+        "style": "",
+        "onvalue": "oui",
+        "onvalueType": "str",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "non",
+        "offvalueType": "str",
+        "officon": "",
+        "offcolor": "",
+        "animate": false,
+        "className": "",
+        "x": 100,
+        "y": 260,
+        "wires": [
+            [
+                "1e5b57e12521d4a7",
+                "8e3db4277e1f318c"
+            ]
+        ]
+    },
+    {
+        "id": "19763c31305cf4dd",
+        "type": "ui_gauge",
+        "z": "f6a90a50c1dcdb61",
+        "name": "",
+        "group": "2964f9fb36c296aa",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "gtype": "wave",
+        "title": "",
+        "label": "Litres",
+        "format": "{{msg.payload[0][\"SUM(consommation)\"]}}",
+        "min": 0,
+        "max": "2000",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "className": "",
+        "x": 850,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "07f6b5e9353b06bd",
+        "type": "inject",
+        "z": "f6a90a50c1dcdb61",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "3",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 110,
+        "y": 580,
+        "wires": [
+            [
+                "4e91458f86b7cea2"
+            ]
+        ]
+    },
+    {
+        "id": "4e91458f86b7cea2",
+        "type": "function",
+        "z": "f6a90a50c1dcdb61",
+        "name": "SELECT consommation Query",
+        "func": "msg.topic='SELECT SUM(consommation) FROM CONSOMMATION'\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 580,
+        "wires": [
+            [
+                "aae3875033dc909e"
+            ]
+        ]
+    },
+    {
+        "id": "aae3875033dc909e",
+        "type": "mysql",
+        "z": "f6a90a50c1dcdb61",
+        "mydb": "96a9d4014a2a59c8",
+        "name": "EAU",
+        "x": 650,
+        "y": 580,
+        "wires": [
+            [
+                "19763c31305cf4dd"
+            ]
+        ]
+    },
+    {
+        "id": "d5474cebfd5c2f54",
+        "type": "function",
+        "z": "f6a90a50c1dcdb61",
+        "name": "SELECT consommation Query",
+        "func": "if(msg.payload ==\"202201\")\n{\n   msg.topic='SELECT SUM(consommation) FROM CONSOMMATION WHERE date >=20220101000000 AND date<20220201000000' \n}\nif(msg.payload ==\"202202\")\n{\n   msg.topic='SELECT SUM(consommation) FROM CONSOMMATION WHERE date >=20220201000000 AND date<20220301000000' \n}\nif(msg.payload ==\"202203\")\n{\n   msg.topic='SELECT SUM(consommation) FROM CONSOMMATION WHERE date >=20220301000000 AND date<20220401000000' \n}\nif(msg.payload ==\"202204\")\n{\n   msg.topic='SELECT SUM(consommation) FROM CONSOMMATION WHERE date >=20220401000000 AND date<20220501000000' \n}\nif(msg.payload ==\"202205\")\n{\n   msg.topic='SELECT SUM(consommation) FROM CONSOMMATION WHERE date >=20220501000000 AND date<20220601000000' \n}\nif(msg.payload ==\"202206\")\n{\n   msg.topic='SELECT SUM(consommation) FROM CONSOMMATION WHERE date >=20220601000000 AND date<20220701000000' \n}\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 640,
+        "wires": [
+            [
+                "62d1771e6e1df582"
+            ]
+        ]
+    },
+    {
+        "id": "fe140a751bdb01ba",
+        "type": "http request",
+        "z": "f6a90a50c1dcdb61",
+        "name": "",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://192.168.5.74/php-api/index.php?ID=3",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "x": 530,
+        "y": 440,
+        "wires": [
+            [
+                "77503b7a8fe08b6a",
+                "f7b804c6061de3a8"
+            ]
+        ]
+    },
+    {
+        "id": "c749f4257ddc6bf2",
+        "type": "inject",
+        "z": "f6a90a50c1dcdb61",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "3",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 350,
+        "y": 440,
+        "wires": [
+            [
+                "fe140a751bdb01ba"
+            ]
+        ]
+    },
+    {
+        "id": "77503b7a8fe08b6a",
+        "type": "ui_text",
+        "z": "f6a90a50c1dcdb61",
+        "group": "c92730fc04b8007e",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Présence : ",
+        "format": "{{msg.payload[0].presence}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 870,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "370f0fe4a0dfba95",
+        "type": "http request",
+        "z": "f6a90a50c1dcdb61",
+        "name": "",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://192.168.5.74/php-api/index.php?ID=2",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "x": 290,
+        "y": 180,
+        "wires": [
+            [
+                "088345dad6e5a763",
+                "4491070d6a677d97"
+            ]
+        ]
+    },
+    {
+        "id": "ba91e302eccd9f80",
+        "type": "inject",
+        "z": "f6a90a50c1dcdb61",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "3",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 110,
+        "y": 180,
+        "wires": [
+            [
+                "370f0fe4a0dfba95"
+            ]
+        ]
+    },
+    {
+        "id": "088345dad6e5a763",
+        "type": "ui_text",
+        "z": "f6a90a50c1dcdb61",
+        "group": "a3f05ac6a6132cff",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Etat : ",
+        "format": "{{msg.payload[0].etat}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 490,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "4d449ab4086c38ba",
+        "type": "ui_dropdown",
+        "z": "f6a90a50c1dcdb61",
+        "name": "",
+        "label": "",
+        "tooltip": "",
+        "place": "Select option",
+        "group": "c5070da54638f417",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "multiple": false,
+        "options": [
+            {
+                "label": "Janvier",
+                "value": "202201",
+                "type": "str"
+            },
+            {
+                "label": "Février",
+                "value": "202202",
+                "type": "str"
+            },
+            {
+                "label": "Mars",
+                "value": "202203",
+                "type": "str"
+            },
+            {
+                "label": "Avril",
+                "value": "202204",
+                "type": "str"
+            },
+            {
+                "label": "Mai",
+                "value": "202205",
+                "type": "str"
+            },
+            {
+                "label": "Juin",
+                "value": "202206",
+                "type": "str"
+            }
+        ],
+        "payload": "",
+        "topic": "topic",
+        "topicType": "msg",
+        "className": "",
+        "x": 120,
+        "y": 640,
+        "wires": [
+            [
+                "d5474cebfd5c2f54"
+            ]
+        ]
+    },
+    {
+        "id": "96fa156b344a1db6",
+        "type": "debug",
+        "z": "f6a90a50c1dcdb61",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1030,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "62d1771e6e1df582",
+        "type": "mysql",
+        "z": "f6a90a50c1dcdb61",
+        "mydb": "96a9d4014a2a59c8",
+        "name": "EAU",
+        "x": 650,
+        "y": 640,
+        "wires": [
+            [
+                "96fa156b344a1db6",
+                "44fbc3fc350994c4"
+            ]
+        ]
+    },
+    {
+        "id": "44fbc3fc350994c4",
+        "type": "ui_gauge",
+        "z": "f6a90a50c1dcdb61",
+        "name": "",
+        "group": "c5070da54638f417",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "gtype": "wave",
+        "title": "",
+        "label": "Litres",
+        "format": "{{msg.payload[0][\"SUM(consommation)\"]}}",
+        "min": 0,
+        "max": "700",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "className": "",
+        "x": 1010,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "4bc67ed140e3cbe6",
+        "type": "debug",
+        "z": "f6a90a50c1dcdb61",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 710,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "8e3db4277e1f318c",
+        "type": "function",
+        "z": "f6a90a50c1dcdb61",
+        "name": "",
+        "func": "\nif(msg.payload == \"non\")\n{\n    msg.headers = {};\n    msg.headers={ \n        'presence':  'non',\n        'Content-Type': 'application/x-www-form-urlencoded'\n    };\n    \n    msg.payload = {};\n    msg.payload={ \n        'presence': 'non'\n    };\n}\nelse\n{\n    msg.headers = {};\n    msg.headers={ \n        'presence':  'oui',\n        'Content-Type': 'application/x-www-form-urlencoded'\n    };\n    \n    msg.payload = {};\n    msg.payload={ \n        'presence': 'oui'\n    };\n}\nreturn msg",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 280,
+        "y": 240,
+        "wires": [
+            [
+                "d0580b1c95d0895d"
+            ]
+        ]
+    },
+    {
+        "id": "1e5b57e12521d4a7",
+        "type": "debug",
+        "z": "f6a90a50c1dcdb61",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 290,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "caadc552da6d3614",
+        "type": "ui_switch",
+        "z": "f6a90a50c1dcdb61",
+        "name": "",
+        "label": "Electrovanne",
+        "tooltip": "",
+        "group": "a3f05ac6a6132cff",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "decouple": "false",
+        "topic": "topic",
+        "topicType": "msg",
+        "style": "",
+        "onvalue": "1",
+        "onvalueType": "num",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "0",
+        "offvalueType": "num",
+        "officon": "",
+        "offcolor": "",
+        "animate": false,
+        "className": "",
+        "x": 750,
+        "y": 60,
+        "wires": [
+            [
+                "8b14d16fbe93b2dc",
+                "e90c64b448f43313"
+            ]
+        ]
+    },
+    {
+        "id": "4491070d6a677d97",
+        "type": "debug",
+        "z": "f6a90a50c1dcdb61",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 510,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "f7b804c6061de3a8",
+        "type": "debug",
+        "z": "f6a90a50c1dcdb61",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 870,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "e90c64b448f43313",
+        "type": "function",
+        "z": "f6a90a50c1dcdb61",
+        "name": "",
+        "func": "\nif(msg.payload == 1)\n{\n    msg.headers = {};\n    msg.headers={ \n        'etat':  'ON',\n        'Content-Type': 'application/x-www-form-urlencoded'\n    };\n    \n    msg.payload = {};\n    msg.payload={ \n        'etat': 'ON'\n    };\n}\nelse\n{\n    msg.headers = {};\n    msg.headers={ \n        'etat':  'OFF',\n        'Content-Type': 'application/x-www-form-urlencoded'\n    };\n    \n    msg.payload = {};\n    msg.payload={ \n        'etat': 'OFF'\n    };\n}\nreturn msg",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 920,
+        "y": 60,
+        "wires": [
+            [
+                "f5f8e0533c37103e"
+            ]
+        ]
+    },
+    {
+        "id": "f5f8e0533c37103e",
+        "type": "http request",
+        "z": "f6a90a50c1dcdb61",
+        "name": "",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://192.168.5.74/php-api/index.php",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "x": 1090,
+        "y": 60,
+        "wires": [
+            [
+                "7bae626c6380e83f"
+            ]
+        ]
+    },
+    {
+        "id": "7bae626c6380e83f",
+        "type": "debug",
+        "z": "f6a90a50c1dcdb61",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1290,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "8b14d16fbe93b2dc",
+        "type": "debug",
+        "z": "f6a90a50c1dcdb61",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 910,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "72f4514b75e50c0c",
+        "type": "ui_spacer",
+        "z": "f6a90a50c1dcdb61",
+        "name": "spacer",
+        "group": "c92730fc04b8007e",
+        "order": 2,
+        "width": "1",
+        "height": "2"
+    },
+    {
+        "id": "5c17039fca9a71e4",
+        "type": "ui_spacer",
+        "z": "f6a90a50c1dcdb61",
+        "name": "spacer",
+        "group": "a3f05ac6a6132cff",
+        "order": 2,
+        "width": "1",
+        "height": "2"
+    },
+    {
+        "id": "a3e1ac2b07c01bc8",
+        "type": "ui_spacer",
+        "z": "f6a90a50c1dcdb61",
+        "name": "spacer",
+        "group": "2964f9fb36c296aa",
+        "order": 3,
+        "width": 1,
+        "height": 1
+    },
+    {
+        "id": "c92730fc04b8007e",
+        "type": "ui_group",
+        "name": "Info Présence",
+        "tab": "1b9c21878c5a90db",
+        "order": 2,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "2964f9fb36c296aa",
+        "type": "ui_group",
+        "name": "Consommation Globale",
+        "tab": "1b9c21878c5a90db",
+        "order": 3,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "96a9d4014a2a59c8",
+        "type": "MySQLdatabase",
+        "name": "",
+        "host": "127.0.0.1",
+        "port": "3306",
+        "db": "EAU",
+        "tz": "UTC+2",
+        "charset": "UTF8"
+    },
+    {
+        "id": "a3f05ac6a6132cff",
+        "type": "ui_group",
+        "name": "Contôle relais ",
+        "tab": "1b9c21878c5a90db",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "c5070da54638f417",
+        "type": "ui_group",
+        "name": "Consommation",
+        "tab": "1b9c21878c5a90db",
+        "order": 4,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "1b9c21878c5a90db",
+        "type": "ui_tab",
+        "name": "Compteur d'eau connecté",
+        "icon": "dashboard",
+        "order": 1,
+        "disabled": false,
+        "hidden": false
+    }
+]
