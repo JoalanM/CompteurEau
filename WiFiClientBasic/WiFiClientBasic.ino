@@ -57,25 +57,31 @@ PubSubClient client(espClient);
 //Fonction d'interruption
 void IRAM_ATTR get_litre()
 {
-   int reading = digitalRead(PIN_CAPTEUR_EAU);
-  if (reading != oldDidStatus) {
-    lastDebounceTime = millis();
-  }
-  if ((millis() - lastDebounceTime)>= debounceDelay) {
-    if (reading != didStatus) {
-      didStatus = reading;
-      
-      if(didStatus == 1){
-        litre++;
-      Serial.print(litre); Serial.println("litres");
-      }
-      //Serial.print(F("Sensor state : ")); Serial.println(didStatus);
+    int reading = digitalRead(PIN_CAPTEUR_EAU);
+    if (reading != oldDidStatus) 
+    {
+        lastDebounceTime = millis();
     }
+    if ((millis() - lastDebounceTime)>= debounceDelay) 
+    {
+        if (reading != didStatus) 
+        {
+            didStatus = reading;
+        
+            if(didStatus == 1)
+            {
+                litre++;
+                Serial.print(litre); Serial.println("litres");
+            }
+            //Serial.print(F("Sensor state : ")); Serial.println(didStatus);
+        }
   }
   oldDidStatus = reading;
 
 }
 
+
+//Setup 
 
 void setup() {
     // serial baud à 115200;
@@ -111,14 +117,13 @@ void setup() {
     client.setServer(mqtt_broker, mqtt_port);
     client.setCallback(callback);
     while (!client.connected()) {
-        String client_id = "esp8266-client-";
-        client_id += String(WiFi.macAddress());
+        String client_id = "esp8266 client mqtt";
         Serial.println("Connexion au Boker Mqtt");
         if (client.connect(client_id.c_str(), mqtt_username, mqtt_password)) {
             Serial.println("Connexion établie !");
         } else {
-            Serial.print("Echec de connexion :  ");
-            Serial.print(client.state());
+            Serial.println("Echec de connexion :  ");
+            Serial.println(client.state());
             delay(2000);
         }
     }
@@ -193,8 +198,8 @@ void setup() {
 
     pinMode(PIN_RELAIS, OUTPUT);
     pinMode(PIN_CAPTEUR_EAU, INPUT_PULLUP);
-    attachInterrupt(PIN_CAPTEUR_EAU, get_litre, HIGH); //Fonction d'interruption 
-    send_consomation.attach(1800,set_litre); //30 x 60 = 1800 s
+    attachInterrupt(PIN_CAPTEUR_EAU, get_litre, CHANGE); //Fonction d'interruption 
+    send_consomation.attach(30,set_litre); //30 x 60 = 1800 s
 
 }
 
@@ -221,6 +226,10 @@ void callback(char *topic, byte *payload, unsigned int length) {
 
 void loop() 
 {
+    if(!client.connected())
+    {
+        reconnect();
+    }
     client.loop();
     int etat_actuelle_relais = digitalRead(PIN_RELAIS);
     if(etat_actuelle_relais!=etat_precedent_relais)
@@ -237,24 +246,35 @@ void loop()
         }
         etat_precedent_relais = etat_actuelle_relais;
     }
+
+    //********************************************************************************
+
+
+
+}
+
+void reconnect()
+{
     //Connexion au serveur mqtt broker
     client.setServer(mqtt_broker, mqtt_port);
     client.setCallback(callback);
     while (!client.connected()) {
-        String client_id = "esp8266-client-";
-        client_id += String(WiFi.macAddress());
+        String client_id = "esp8266 client mqtt";
         Serial.println("Connexion au Boker Mqtt");
         if (client.connect(client_id.c_str(), mqtt_username, mqtt_password)) {
             Serial.println("Connexion établie !");
         } else {
-            Serial.print("Echec de connexion :  ");
-            Serial.print(client.state());
+            Serial.println("Echec de connexion :  ");
+            Serial.println(client.state());
             delay(2000);
         }
     }
     //********************************************************************************
 
-
+    // publish and subscribe
+    client.publish(topic, "hello esp8266");
+    client.subscribe(topic);
+    //********************************************************************************
 
 }
 
