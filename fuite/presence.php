@@ -30,7 +30,7 @@
 
 
 		setInterval('consommation()', 1000);
-		function presence()
+		function consommation()
 		{
 			$('#consommation').load('fuite.php');
 			

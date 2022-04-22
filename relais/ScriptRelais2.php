@@ -1,7 +1,7 @@
 <?php
 			
             //importation classes phpMQTT
-            require("classes/phpMQTT.php");
+            require("../classes/phpMQTT.php");
             //**************************** */
 
             //Informations de connexion au serveur Mosquitto
@@ -9,7 +9,7 @@
             $port = 1883;
             $username_mqtt = "esp8266";
             $password_mqtt = "esp8266";
-            $client_id = "PhpMqtt";
+            $client_id = "PhpMqtt01";
             //************************* */
 			
 			//***********Information de connexion BASE DE DONNEE***************** */
@@ -51,10 +51,30 @@
 			{
 				echo "0 résultat";
 			}
+			
+			//************************************************************************************ */
+
+			//***************************Récupérer derniere valeure ************************************
+			$sql = "SELECT etat FROM RELAIS ORDER BY ID DESC LIMIT 1";
+			$result = $conn->query($sql);
+
+			if ($result->num_rows > 0) 
+			{
+				// output data of each row
+				while($row = $result->fetch_assoc()) 
+				{
+					$etat_relais = $row["etat"];
+					echo $etat_relais;
+				}
+			} 
+			else 
+			{
+				echo "0 résultat";
+			}
 			$conn->close();
 			//************************************************************************************ */
 
-			if($reponse == "non")
+			if($reponse == "ON" and $etat_relais == "OFF")
 					{
 						$message = "1";
 						$mqtt = new bluerhinos\phpMQTT($server, $port, $client_id);
@@ -69,7 +89,7 @@
 							echo "Echec ou expiration du délai";
 						}
 					}
-					else if($reponse == "oui")
+					else if($reponse == "OFF" and $etat_relais == "ON")
 					{
 						$message = "0";
 						$mqtt = new bluerhinos\phpMQTT($server, $port, $client_id);

@@ -1,7 +1,7 @@
 <?php
 			
             //importation classes phpMQTT
-            require("classes/phpMQTT.php");
+            require("../classes/phpMQTT.php");
             //**************************** */
 			require('presence02.php');
             //Informations de connexion au serveur Mosquitto
@@ -9,7 +9,7 @@
             $port = 1883;
             $username_mqtt = "esp8266";
             $password_mqtt = "esp8266";
-            $client_id = "PhpMqtt";
+            $client_id = "PhpMqtt2";
             //************************* */
 			
 			//***********Information de connexion BASE DE DONNEE***************** */
@@ -34,6 +34,7 @@
 
 			$date_depart2 = $date_depart;
 			$presence= $reponse;
+
 
 			if($presence=="non")
 			{
@@ -60,37 +61,93 @@
 
 					if($consommation >= 10 && $consommation<20)
 					{
-						echo "ATTENTION FUITE EVENTUELLE ";
-						$destinataire = "myrtil.joalan1@gmail.com";
-						$sujet = "Consommation détectée";
-						$message .= "Bonjour, \n";
-						$message.= "\n\n";
-						$message.= "NOus avons constatée une consommation de $consommation litres en votre abscence.\n";
-						$message.= "Nous vous conseillons de fermée votre électrovanne si vous estimez que cette consommation est non justifier.\n";
-						$message.= "Si votre consommation dépasse 25 litres en votre abscence le système fermera automatiquement l'électrovanne afin d'éviter une inondation ou une surconsommation non justifier.\n";
-						$headers = "From : esp8266projet@gmail.com";
-						mail($destinataire, $sujet, $message, $headers); 
+						$sql = "SELECT date FROM FUITE ORDER BY ID DESC LIMIT 1";
+						$result = $conn->query($sql);
+
+						if ($result->num_rows > 0) 
+						{
+							// output data of each row
+							while($row = $result->fetch_assoc()) 
+							{
+								$reponse01 = $row["date"];
+								if($date_depart2 == $reponse01)
+								{
+									echo "\n mail déja envoyée ";
+								}
+								else
+								{
+									echo "\nATTENTION FUITE EVENTUELLE ";
+									$destinataire = "myrtil.joalan1@gmail.com";
+									$sujet = "Consommation détectée";
+									$message .= "Bonjour, \n";
+									$message.= "\n\n";
+									$message.= "Nous avons constatée une consommation de $consommation litres en votre abscence.\n";
+									$message.= "Nous vous conseillons de fermée votre électrovanne si vous estimez que cette consommation est non justifier.\n";
+									$message.= "Si votre consommation dépasse 20 litres en votre abscence le système fermera automatiquement l'électrovanne afin d'éviter une inondation ou une surconsommation non justifier.\n";
+									$message.= "\n\n\n\n";
+									$message.= "Mail envoyée automatiquement depuis le système 'compteur d'eau connectée' veuillez ne pas répondre à ce mail. ";
+									$headers.= "From : esp8266projet@gmail.com \n";
+									$headers.= "Le ". date('d-m-y à h:i:s');
+									mail($destinataire, $sujet, $message, $headers); 
+									$sql = "INSERT IGNORE INTO FUITE (date) VALUES ($date_depart2)";
+									if($conn -> query($sql)==TRUE)
+									{
+										echo "\n Nouvelle enregistrement réussi";
+									}
+								}
+							
+							}
+						} 
+						else 
+						{
+							echo "0 résultat";
+						}
+						$conn->close();
+						
+						
+
+						
 					} 
 					else if($consommation>20)
 					{
+						$sql = "SELECT etat FROM RELAIS ORDER BY ID DESC LIMIT 1";
+						$result = $conn->query($sql);
+
+						if ($result->num_rows > 0) 
+						{
+							// output data of each row
+							while($row = $result->fetch_assoc()) 
+							{
+								$etat = $row["etat"];
+								if($etat == "ON")
+								{
+									$postdata = http_build_query(
+										array(
+											'etat' => 'OFF',
+			
+										)
+									);
+									$opts = array('http' =>
+										array(
+											'method' => 'POST',
+											'header' => 'Content-type: application/x-www-form-urlencoded',
+											'content' => $postdata
+										)
+									);
+									$context = stream_context_create($opts);
+									$result = file_get_contents('http://192.168.5.74/php-api/index.php', false, $context);
+									echo $result;
+			
+								}
+							}
+						} 
+						else 
+						{
+							echo "0 résultat";
+						}
+						$conn->close();
 						
-						$postdata = http_build_query(
-							array(
-								'etat' => 'OFF',
-
-							)
-						);
-						$opts = array('http' =>
-							array(
-								'method' => 'POST',
-								'header' => 'Content-type: application/x-www-form-urlencoded',
-								'content' => $postdata
-							)
-						);
-						$context = stream_context_create($opts);
-						$result = file_get_contents('http://192.168.5.74/php-api/index.php', false, $context);
-						echo $result;
-
+						
 					}
 				} 
 				else 
