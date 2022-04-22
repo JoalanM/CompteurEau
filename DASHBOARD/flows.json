@@ -21,46 +21,11 @@
         "proxy": "",
         "authType": "",
         "senderr": false,
-        "x": 510,
-        "y": 240,
+        "x": 450,
+        "y": 160,
         "wires": [
             [
                 "4bc67ed140e3cbe6"
-            ]
-        ]
-    },
-    {
-        "id": "44a031360780f2d5",
-        "type": "ui_switch",
-        "z": "f6a90a50c1dcdb61",
-        "name": "",
-        "label": "Présence",
-        "tooltip": "",
-        "group": "c92730fc04b8007e",
-        "order": 3,
-        "width": 0,
-        "height": 0,
-        "passthru": true,
-        "decouple": "false",
-        "topic": "topic",
-        "topicType": "msg",
-        "style": "",
-        "onvalue": "oui",
-        "onvalueType": "str",
-        "onicon": "",
-        "oncolor": "",
-        "offvalue": "non",
-        "offvalueType": "str",
-        "officon": "",
-        "offcolor": "",
-        "animate": false,
-        "className": "",
-        "x": 100,
-        "y": 260,
-        "wires": [
-            [
-                "1e5b57e12521d4a7",
-                "8e3db4277e1f318c"
             ]
         ]
     },
@@ -186,8 +151,8 @@
         "proxy": "",
         "authType": "",
         "senderr": false,
-        "x": 530,
-        "y": 440,
+        "x": 350,
+        "y": 420,
         "wires": [
             [
                 "77503b7a8fe08b6a",
@@ -216,8 +181,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 350,
-        "y": 440,
+        "x": 170,
+        "y": 420,
         "wires": [
             [
                 "fe140a751bdb01ba"
@@ -237,8 +202,8 @@
         "format": "{{msg.payload[0].presence}}",
         "layout": "row-spread",
         "className": "",
-        "x": 870,
-        "y": 380,
+        "x": 670,
+        "y": 420,
         "wires": []
     },
     {
@@ -256,7 +221,7 @@
         "authType": "",
         "senderr": false,
         "x": 290,
-        "y": 180,
+        "y": 80,
         "wires": [
             [
                 "088345dad6e5a763",
@@ -286,7 +251,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 110,
-        "y": 180,
+        "y": 80,
         "wires": [
             [
                 "370f0fe4a0dfba95"
@@ -307,7 +272,7 @@
         "layout": "row-spread",
         "className": "",
         "x": 490,
-        "y": 180,
+        "y": 80,
         "wires": []
     },
     {
@@ -317,9 +282,9 @@
         "name": "",
         "label": "",
         "tooltip": "",
-        "place": "Select option",
+        "place": "",
         "group": "c5070da54638f417",
-        "order": 1,
+        "order": 2,
         "width": 0,
         "height": 0,
         "passthru": true,
@@ -405,7 +370,7 @@
         "z": "f6a90a50c1dcdb61",
         "name": "",
         "group": "c5070da54638f417",
-        "order": 2,
+        "order": 1,
         "width": 0,
         "height": 0,
         "gtype": "wave",
@@ -431,15 +396,15 @@
         "type": "debug",
         "z": "f6a90a50c1dcdb61",
         "name": "",
-        "active": false,
+        "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 710,
-        "y": 240,
+        "x": 670,
+        "y": 160,
         "wires": []
     },
     {
@@ -447,14 +412,14 @@
         "type": "function",
         "z": "f6a90a50c1dcdb61",
         "name": "",
-        "func": "\nif(msg.payload == \"non\")\n{\n    msg.headers = {};\n    msg.headers={ \n        'presence':  'non',\n        'Content-Type': 'application/x-www-form-urlencoded'\n    };\n    \n    msg.payload = {};\n    msg.payload={ \n        'presence': 'non'\n    };\n}\nelse\n{\n    msg.headers = {};\n    msg.headers={ \n        'presence':  'oui',\n        'Content-Type': 'application/x-www-form-urlencoded'\n    };\n    \n    msg.payload = {};\n    msg.payload={ \n        'presence': 'oui'\n    };\n}\nreturn msg",
+        "func": "\nif(msg.payload == \"non\")\n{\n    msg.headers = {};\n    msg.headers={ \n        'presence':  'non',\n        'Content-Type': 'application/x-www-form-urlencoded'\n    };\n    \n    msg.payload = {};\n    msg.payload={ \n        'presence': 'non'\n    };\n}\nelse if(msg.payload == \"oui\")\n{\n    msg.headers = {};\n    msg.headers={ \n        'presence':  'oui',\n        'Content-Type': 'application/x-www-form-urlencoded'\n    };\n    \n    msg.payload = {};\n    msg.payload={ \n        'presence': 'oui'\n    };\n}\nreturn msg",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 280,
-        "y": 240,
+        "x": 260,
+        "y": 160,
         "wires": [
             [
                 "d0580b1c95d0895d"
@@ -473,44 +438,9 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 290,
-        "y": 300,
+        "x": 270,
+        "y": 220,
         "wires": []
-    },
-    {
-        "id": "caadc552da6d3614",
-        "type": "ui_switch",
-        "z": "f6a90a50c1dcdb61",
-        "name": "",
-        "label": "Electrovanne",
-        "tooltip": "",
-        "group": "a3f05ac6a6132cff",
-        "order": 3,
-        "width": 0,
-        "height": 0,
-        "passthru": true,
-        "decouple": "false",
-        "topic": "topic",
-        "topicType": "msg",
-        "style": "",
-        "onvalue": "1",
-        "onvalueType": "num",
-        "onicon": "",
-        "oncolor": "",
-        "offvalue": "0",
-        "offvalueType": "num",
-        "officon": "",
-        "offcolor": "",
-        "animate": false,
-        "className": "",
-        "x": 750,
-        "y": 60,
-        "wires": [
-            [
-                "8b14d16fbe93b2dc",
-                "e90c64b448f43313"
-            ]
-        ]
     },
     {
         "id": "4491070d6a677d97",
@@ -525,7 +455,7 @@
         "statusVal": "",
         "statusType": "auto",
         "x": 510,
-        "y": 140,
+        "y": 40,
         "wires": []
     },
     {
@@ -540,8 +470,8 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 870,
-        "y": 320,
+        "x": 670,
+        "y": 380,
         "wires": []
     },
     {
@@ -555,7 +485,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 920,
+        "x": 960,
         "y": 60,
         "wires": [
             [
@@ -577,7 +507,7 @@
         "proxy": "",
         "authType": "",
         "senderr": false,
-        "x": 1090,
+        "x": 1150,
         "y": 60,
         "wires": [
             [
@@ -590,14 +520,14 @@
         "type": "debug",
         "z": "f6a90a50c1dcdb61",
         "name": "",
-        "active": false,
+        "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1290,
+        "x": 1330,
         "y": 60,
         "wires": []
     },
@@ -613,9 +543,123 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 910,
+        "x": 950,
         "y": 120,
         "wires": []
+    },
+    {
+        "id": "f7b42f69c4b7b5ec",
+        "type": "ui_button",
+        "z": "f6a90a50c1dcdb61",
+        "name": "",
+        "group": "a3f05ac6a6132cff",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "ON",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "green",
+        "className": "",
+        "icon": "",
+        "payload": "1",
+        "payloadType": "num",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 670,
+        "y": 40,
+        "wires": [
+            [
+                "e90c64b448f43313",
+                "8b14d16fbe93b2dc"
+            ]
+        ]
+    },
+    {
+        "id": "816e84f7dc0db9fe",
+        "type": "ui_button",
+        "z": "f6a90a50c1dcdb61",
+        "name": "",
+        "group": "a3f05ac6a6132cff",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "OFF",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "red",
+        "className": "",
+        "icon": "",
+        "payload": "0",
+        "payloadType": "num",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 670,
+        "y": 80,
+        "wires": [
+            [
+                "e90c64b448f43313",
+                "8b14d16fbe93b2dc"
+            ]
+        ]
+    },
+    {
+        "id": "f8dec0131d705786",
+        "type": "ui_button",
+        "z": "f6a90a50c1dcdb61",
+        "name": "",
+        "group": "c92730fc04b8007e",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Présent",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "green",
+        "className": "",
+        "icon": "",
+        "payload": "oui",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 80,
+        "y": 160,
+        "wires": [
+            [
+                "8e3db4277e1f318c"
+            ]
+        ]
+    },
+    {
+        "id": "369ce7dd23544338",
+        "type": "ui_button",
+        "z": "f6a90a50c1dcdb61",
+        "name": "",
+        "group": "c92730fc04b8007e",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Abscent",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "red",
+        "className": "",
+        "icon": "",
+        "payload": "non",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 80,
+        "y": 200,
+        "wires": [
+            [
+                "8e3db4277e1f318c"
+            ]
+        ]
     },
     {
         "id": "72f4514b75e50c0c",
@@ -648,17 +692,6 @@
         "height": 1
     },
     {
-        "id": "c92730fc04b8007e",
-        "type": "ui_group",
-        "name": "Info Présence",
-        "tab": "1b9c21878c5a90db",
-        "order": 2,
-        "disp": true,
-        "width": "6",
-        "collapse": false,
-        "className": ""
-    },
-    {
         "id": "2964f9fb36c296aa",
         "type": "ui_group",
         "name": "Consommation Globale",
@@ -678,6 +711,17 @@
         "db": "EAU",
         "tz": "UTC+2",
         "charset": "UTF8"
+    },
+    {
+        "id": "c92730fc04b8007e",
+        "type": "ui_group",
+        "name": "Info Présence",
+        "tab": "1b9c21878c5a90db",
+        "order": 2,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
     },
     {
         "id": "a3f05ac6a6132cff",
