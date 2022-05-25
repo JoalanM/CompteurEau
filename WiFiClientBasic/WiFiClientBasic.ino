@@ -171,12 +171,12 @@ void setup() {
 
             if(String(etat)=="ON")
             {
-                digitalWrite(PIN_RELAIS, HIGH);
+                digitalWrite(PIN_RELAIS, LOW);
                 Serial.println("Courrant circule ");
             }
             else if (String(etat) == "OFF")
             {
-                digitalWrite(PIN_RELAIS, LOW);
+                digitalWrite(PIN_RELAIS, HIGH);
                 Serial.println("Courrant fermée ");
             }
             
@@ -216,11 +216,11 @@ void callback(char *topic, byte *payload, unsigned int length) {
     Serial.println(" ");
     if (message == "1")
     {
-        digitalWrite(PIN_RELAIS,HIGH);
+        digitalWrite(PIN_RELAIS,LOW);
     }
     else if(message == "0")
     {
-        digitalWrite(PIN_RELAIS,LOW);
+        digitalWrite(PIN_RELAIS,HIGH);
     } 
 }
 
@@ -236,7 +236,7 @@ void loop()
     {
         //Serial.print("Etat actuelle : ");
         //Serial.println(digitalRead(PIN_RELAIS));
-        if(digitalRead(PIN_RELAIS)==HIGH)
+        if(digitalRead(PIN_RELAIS)==LOW)
         {
            client.publish("topic/relais", "Etat actuelle : Ouvert");
         }
