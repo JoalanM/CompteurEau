@@ -1,38 +1,32 @@
-//Importation bibliothéque
+//Importation bibliothèque
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <ESP8266HTTPClient.h>
-#include <WiFiClient.h>
 #include <ArduinoJson.h>
+#include <WiFiClient.h>
 #include <Arduino.h>
 #include <Ticker.h>
-// *****************************
-
+//*******************************
 
 Ticker send_consomation;
 
-//Definition PIN 
+//Définition PIN
 #define PIN_RELAIS 5
 #define PIN_CAPTEUR_EAU 4
-// ***************************
-
-
+//**************************
 
 int etat_precedent_relais = digitalRead(PIN_RELAIS);
 
-//Variable Filtrage Anti-Rebonds
-bool didStatus  = false;
-bool oldDidStatus  = false;
-unsigned long lastDebounceTime  = 0;
-unsigned long debounceDelay  = 50;
-// ************************************
-
+//compteur d'eau
+//etat précédent compteur
+int etat_precedent = LOW;
 //Compteur litre 
 int litre = 0;
 int consommation_precedent = 0;
 int consommation_actuelle =0;
-// *****************************
-
+//delais sans rebond
+#define delai_sans_rebond 2000000 //2secondes
+//**********************************************
 
 
 //Info WiFi
@@ -46,39 +40,41 @@ const char *topic = "topic/relais";
 const char *mqtt_username = "esp8266";
 const char *mqtt_password = "esp8266";
 const int mqtt_port = 1883;
-// ******************************************
+//*****************************************
 
-//Definition client mqtt
+//Client MQTT
 WiFiClient espClient;
 PubSubClient client(espClient);
-//******************************
+//*******************************
 
-
-//Fonction d'interruption
-void  get_litre()
+//Fonction d'interruption & compteur litres
+void IRAM_ATTR get_litre()
 {
-    int reading = digitalRead(PIN_CAPTEUR_EAU);
-    if (reading != oldDidStatus) 
+    unsigned long _micros;
+    int etat_actuelle = digitalRead(PIN_CAPTEUR_EAU);
+    if(etat_actuelle!=etat_precedent)
     {
-        lastDebounceTime = millis();
-    }
-    if ((millis() - lastDebounceTime)>= debounceDelay) 
-    {
-        if (reading != didStatus) 
+        _micros =micros();
+        //Serial.print("Etat actuelle : ");
+        //Serial.println(digitalRead(PIN_RELAIS));
+
+        if(_micros>=delai_sans_rebond)
         {
-            didStatus = reading;
-        
-            if(didStatus == 1)
-            {
-                litre++;
-                Serial.print(litre); Serial.println("litres");
-            }
-            //Serial.print(F("Sensor state : ")); Serial.println(didStatus);
+          if(digitalRead(PIN_CAPTEUR_EAU)==HIGH)
+          {
+            litre++;
+            Serial.print(litre);
+            Serial.println(" litre");
+
+          }
         }
-  }
-  oldDidStatus = reading;
+        
+        etat_precedent = etat_actuelle;
+        _micros = 0;
+    } 
 
 }
+//************************************************************
 
 
 //Setup 
@@ -198,7 +194,7 @@ void setup() {
 
     pinMode(PIN_RELAIS, OUTPUT);
     pinMode(PIN_CAPTEUR_EAU, INPUT_PULLUP);
-    //attachInterrupt(digitalPinToInterrupt(PIN_CAPTEUR_EAU), get_litre, CHANGE); //Fonction d'interruption 
+    attachInterrupt(PIN_CAPTEUR_EAU, get_litre, CHANGE); //Fonction d'interruption 
     send_consomation.attach(30,set_litre); //30 x 60 = 1800 s
 
 }
@@ -226,7 +222,6 @@ void callback(char *topic, byte *payload, unsigned int length) {
 
 void loop() 
 {
-  get_litre();
     if(!client.connected())
     {
         reconnect();
@@ -283,12 +278,20 @@ void reconnect()
 
 void set_litre()
 {
-    consommation_actuelle = litre-consommation_precedent;
-    consommation_precedent+=consommation_actuelle;
-    char const *litre_char;
-    String mystr; 
-    mystr=String(consommation_actuelle);
-    litre_char = mystr.c_str();
-    client.publish("topic/consommation", litre_char);
+    if(!client.connected())
+    {
+        reconnect();
+    }
+    else
+    {
+        consommation_actuelle = litre-consommation_precedent;
+        consommation_precedent+=consommation_actuelle;
+        char const *litre_char;
+        String mystr; 
+        mystr=String(consommation_actuelle);
+        litre_char = mystr.c_str();
+        client.publish("topic/consommation", litre_char); 
+    }
+    
 
 }
