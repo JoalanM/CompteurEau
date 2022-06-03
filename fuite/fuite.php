@@ -77,7 +77,7 @@
 								else
 								{
 									echo "\nATTENTION FUITE EVENTUELLE ";
-									$destinataire = "myrtil.joalan1@gmail.com";
+									$destinataire = "myrtil.joalan1@gmail.com,samyhachemaoui@gmail.com";
 									$sujet = "Consommation détectée";
 									$message .= "Bonjour, \n";
 									$message.= "\n\n";
