@@ -59,7 +59,7 @@
 					}
 					echo "<br>" .$consommation ."<br>";
 
-					if($consommation >= 10 && $consommation<20)
+					if($consommation >= 1 && $consommation<3)
 					{
 						$sql = "SELECT date FROM FUITE ORDER BY ID DESC LIMIT 1";
 						$result = $conn->query($sql);
@@ -108,7 +108,7 @@
 
 						
 					} 
-					else if($consommation>20)
+					else if($consommation>3)
 					{
 						$sql = "SELECT etat FROM RELAIS ORDER BY ID DESC LIMIT 1";
 						$result = $conn->query($sql);
@@ -119,11 +119,11 @@
 							while($row = $result->fetch_assoc()) 
 							{
 								$etat = $row["etat"];
-								if($etat == "ON")
+								if($etat == "OFF")
 								{
 									$postdata = http_build_query(
 										array(
-											'etat' => 'OFF',
+											'etat' => 'ON',
 			
 										)
 									);
